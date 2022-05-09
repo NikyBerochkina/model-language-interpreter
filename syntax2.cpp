@@ -39,7 +39,7 @@ Parser::Parser(Scanner& scanner, Poliz& poliz)
 
 void Parser::Analize()
 {
-    if (const auto lex = m_scanner.GetLexeme(); lex.type != LexemeType::Program)
+    if (const auto lex = GetLexeme(); lex.type != LexemeType::Program)
     {
         THROW("'program' expected", m_scanner.GetCurrentLine(), lex);
     }
