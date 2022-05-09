@@ -260,6 +260,18 @@ Lexeme Scanner::GetLexeme()
                 {
                     return {LexemeType::String, {}};
                 }
+                if (buffer == "boolean")
+                {
+                    return {LexemeType::Boolean, {}};
+                }
+                if (buffer == "true")
+                {
+                    return {LexemeType::Literal, true};
+                }
+                if (buffer == "false")
+                {
+                    return {LexemeType::Literal, false};
+                }
                 if (buffer == "if")
                 {
                     return {LexemeType::If, {}};
@@ -319,7 +331,7 @@ std::ostream& operator << (std::ostream& os, const Lexeme& lex)
             using T = std::decay_t<decltype(l)>;
             if constexpr (!std::is_same_v<T, std::monostate>)
             {
-                os << ", value: {" << l << '}';
+                os << ", value: {" << std::boolalpha << l << '}';
             }
         },
         lex.value);

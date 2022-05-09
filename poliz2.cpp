@@ -19,13 +19,13 @@ bool Poliz::HasIdentifier(const std::string& identifier) const
 
 size_t Poliz::AddGoto()
 {
-    m_poliz.push_back({LexemeType::Goto, 11111});
+    m_poliz.push_back({LexemeType::Goto, -1ll});
     return m_poliz.size() - 1;
 }
 
 size_t Poliz::AddConditionalGoto()
 {
-    m_poliz.push_back({LexemeType::ConditionalGoto, 11111});
+    m_poliz.push_back({LexemeType::ConditionalGoto, -1ll});
     return m_poliz.size() - 1;
 }
 

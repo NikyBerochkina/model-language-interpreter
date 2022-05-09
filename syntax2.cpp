@@ -130,7 +130,7 @@ void Parser::AnalizeVariable(LexemeType type)
         }
         else if (type == LexemeType::Int)
         {
-            defaultValue = 0;
+            defaultValue = 0ll;
         }
         m_poliz.AddIdentifier(identifier, defaultValue);
         SaveLexeme(std::move(assign));

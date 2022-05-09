@@ -1,0 +1,4 @@
+program
+{
+    boolean x = false;
+}
