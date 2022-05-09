@@ -1,0 +1,11 @@
+program
+{
+    string x = "azaza", y = "foobar";
+    
+    if (not 0)
+        read(x);
+    else
+        read(y);
+    write(x, y);
+}
+

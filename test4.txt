@@ -1,0 +1,14 @@
+program
+{
+  int i = 0, counter;
+
+  write("enter number: ");
+  read(counter);
+  write("count up to", counter);
+
+  while (i <= counter)
+  {
+    write(i * i);
+    i = i + 1;
+  }
+}
