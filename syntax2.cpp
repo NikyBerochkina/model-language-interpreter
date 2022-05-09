@@ -86,7 +86,9 @@ void Parser::AnalizeProgram(bool defenitions)
 void Parser::AnalizeDefenitions()
 {
     Lexeme lexeme = GetLexeme();
-    while (lexeme.type == LexemeType::Int || lexeme.type == LexemeType::String)
+    while (lexeme.type == LexemeType::Int  
+        || lexeme.type == LexemeType::String 
+        || lexeme.type == LexemeType::Boolean)
     {
         AnalizeDefenition(lexeme.type);
         lexeme = GetLexeme();
@@ -132,6 +134,10 @@ void Parser::AnalizeVariable(LexemeType type)
         {
             defaultValue = 0ll;
         }
+        else if (type == LexemeType::Boolean)
+        {
+            defaultValue = false;
+        }
         m_poliz.AddIdentifier(identifier, defaultValue);
         SaveLexeme(std::move(assign));
         return;
@@ -149,6 +155,10 @@ void Parser::AnalizeVariable(LexemeType type)
     if (type == LexemeType::Int && !std::get_if<long long int>(&value.value))
     {
         THROW("integral literal expected", m_scanner.GetCurrentLine(), value);
+    }
+    if (type == LexemeType::Boolean && !std::get_if<bool>(&value.value))
+    {
+        THROW("boolean literal expected", m_scanner.GetCurrentLine(), value);
     }
     m_poliz.AddIdentifier(identifier, value.value);
 }
