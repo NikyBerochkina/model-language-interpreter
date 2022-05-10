@@ -38,6 +38,8 @@ enum class LexemeType
     Or,
     Identifier,
     Break,
+    UnaryMinus,
+    UnaryPlus,
     Goto,
     ConditionalGoto,
     Clear,

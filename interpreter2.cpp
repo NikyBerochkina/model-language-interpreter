@@ -83,6 +83,8 @@ void Interpreter::Run(bool debug)
             break;
         
         case LexemeType::Not:
+        case LexemeType::UnaryMinus:
+        case LexemeType::UnaryPlus:
             HandleUnary(m_program[i].type);
             i += 1;
             break;
@@ -304,6 +306,23 @@ void Interpreter::HandleUnary(LexemeType type)
         {
         case LexemeType::Not:
             m_stack.push({LexemeType::Literal, !opInt});
+            break;
+        
+        default:
+            throw std::runtime_error("unsupported bool operation");
+        }
+    }
+    else if (std::holds_alternative<long long int>(opValue))
+    {
+        const auto opInt = std::get<long long int>(opValue);
+        switch (type)
+        {
+        case LexemeType::UnaryMinus:
+            m_stack.push({LexemeType::Literal, -opInt});
+            break;
+        
+        case LexemeType::UnaryPlus:
+            m_stack.push({LexemeType::Literal, +opInt});
             break;
         
         default:

@@ -415,6 +415,16 @@ void Parser::AnalizeExpressionThirdLevel()
         saved = lex;
         lex = GetLexeme();
     }
+    else if (lex.type == LexemeType::Minus)
+    {
+        saved = {LexemeType::UnaryMinus, {}};
+        lex = GetLexeme();
+    }
+    else if (lex.type == LexemeType::Plus)
+    {
+        saved = {LexemeType::UnaryPlus, {}};
+        lex = GetLexeme();
+    }
     if (lex.type == LexemeType::Identifier)
     {
         if (!m_poliz.HasIdentifier(std::get<std::string>(lex.value)))
