@@ -1,6 +1,8 @@
 #pragma once
 #include "lexical2.h"
 #include <optional>
+#include <vector>
+#include <stack>
 
 class Poliz;
 
@@ -27,6 +29,7 @@ private:
     void AnalizeWhile();
     void AnalizeRead();
     void AnalizeWrite();
+    void AnalizeBreak();
     void AnalizeExpressionOperator();
     void AnalizeExpression();
     void AnalizeExpressionFirstLevel();
@@ -37,6 +40,7 @@ private:
     std::optional<Lexeme> m_saved;
 
     Poliz& m_poliz;
+    std::stack<std::vector<size_t>> m_breaks;
 };
 
 class syntax_exception

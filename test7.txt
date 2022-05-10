@@ -1,0 +1,18 @@
+program
+{
+    int i = 0, n = 10;
+
+    while (true)
+    {
+        if (i > n)
+            break;
+        i = i + 1;
+        write(i);
+
+        if (i > n - 1)
+        {
+            write("ooops");
+            break;
+        }
+    }
+}

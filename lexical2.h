@@ -37,6 +37,7 @@ enum class LexemeType
     And,
     Or,
     Identifier,
+    Break,
     Goto,
     ConditionalGoto,
     Clear,

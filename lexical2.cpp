@@ -304,6 +304,10 @@ Lexeme Scanner::GetLexeme()
                 {
                     return {LexemeType::Or, {}};
                 }
+                if (buffer == "break")
+                {
+                    return {LexemeType::Break, {}};
+                }
                 return {LexemeType::Identifier, buffer};
             }
             break;

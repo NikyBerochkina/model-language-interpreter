@@ -196,6 +196,10 @@ bool Parser::AnalizeOperator()
     case LexemeType::Write:
         AnalizeWrite();
         break;
+    
+    case LexemeType::Break:
+        AnalizeBreak();
+        break;
 
     case LexemeType::LeftBrace:
         AnalizeProgram(false);
@@ -262,6 +266,8 @@ void Parser::AnalizeWhile()
     }
 
     auto exitPos = m_poliz.AddConditionalGoto();
+
+    m_breaks.push({});
     if (!AnalizeOperator())
     {
         THROW("operator expected", m_scanner.GetCurrentLine(), Lexeme{});
@@ -269,6 +275,11 @@ void Parser::AnalizeWhile()
     auto pos = m_poliz.AddGoto();
     m_poliz.SetLabel(pos, label);
     m_poliz.SetLabel(exitPos);
+    for (auto pos: m_breaks.top())
+    {
+        m_poliz.SetLabel(pos);
+    }
+    m_breaks.pop();
 }
 
 void Parser::AnalizeRead()
@@ -324,6 +335,19 @@ void Parser::AnalizeWrite()
         THROW("';' expected", m_scanner.GetCurrentLine(), lex);
     }
     m_poliz.AddLexeme({LexemeType::Write, counter});
+}
+
+void Parser::AnalizeBreak()
+{
+    if (m_breaks.empty())
+    {
+        THROW("break is out of any loop", m_scanner.GetCurrentLine(), Lexeme{LexemeType::Break});
+    }
+    if (const auto lex = GetLexeme(); lex.type != LexemeType::Semicolon)
+    {
+        THROW("';' expected", m_scanner.GetCurrentLine(), lex);
+    }
+    m_breaks.top().push_back(m_poliz.AddGoto());
 }
 
 void Parser::AnalizeExpressionOperator()
@@ -395,7 +419,7 @@ void Parser::AnalizeExpressionThirdLevel()
     {
         if (!m_poliz.HasIdentifier(std::get<std::string>(lex.value)))
         {
-            throw std::runtime_error("unknown identifier");
+            THROW("unknown identifier", m_scanner.GetCurrentLine(), lex);
         }
         m_poliz.AddLexeme(lex);
 
