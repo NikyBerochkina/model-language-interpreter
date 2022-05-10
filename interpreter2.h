@@ -12,7 +12,7 @@ public:
     Interpreter(const Interpreter& rhs) = delete;
     Interpreter& operator = (const Interpreter& rhs) = delete;
 
-    void Run();
+    void Run(bool debug = false);
 
 private:
     void HandleRead();

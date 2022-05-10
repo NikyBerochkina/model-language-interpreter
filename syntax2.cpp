@@ -128,7 +128,7 @@ void Parser::AnalizeVariable(LexemeType type)
         Value defaultValue;
         if (type == LexemeType::String)
         {
-            defaultValue = "";
+            defaultValue = std::string{};
         }
         else if (type == LexemeType::Int)
         {

@@ -8,11 +8,17 @@ Interpreter::Interpreter(const std::vector<Lexeme>& program,
 {
 }
 
-void Interpreter::Run()
+void Interpreter::Run(bool debug)
 {
     size_t i{0};
     while (i < m_program.size())
     {
+        if (debug)
+        {
+            std::cerr << '[' << m_program[i]
+                      << ", ip: " << i
+                      << ", stack: " << m_stack.size() <<  "]\n";
+        }
         switch (m_program[i].type)
         {
         case LexemeType::Identifier:
@@ -36,7 +42,7 @@ void Interpreter::Run()
             break;
         
         case LexemeType::ConditionalGoto:
-            if (std::get<long long int>(m_stack.top().value) == 0)
+            if (!std::get<bool>(m_stack.top().value))
             {
                 i = std::get<long long int>(m_program[i].value);
             }
@@ -123,7 +129,7 @@ void Interpreter::HandleWrite(size_t ctr)
                 using T = std::decay_t<decltype(v)>;
                 if constexpr (!std::is_same_v<T, std::monostate>)
                 {
-                    std::cout << v << " ";
+                    std::cout << std::boolalpha << v << " ";
                 }
             },
             ResolveValue(lex));
@@ -254,16 +260,28 @@ void Interpreter::HandleBinary(LexemeType type)
             result.value = lhsInt != rhsInt;
             break;
         
+        default:
+            throw std::runtime_error("unsupported string operation");
+        }
+        m_stack.push(std::move(result));
+    }
+    else if (std::holds_alternative<bool>(lhsValue))
+    {
+        Lexeme result{LexemeType::Literal, {}};
+        const auto lhsInt = std::get<bool>(lhsValue);
+        const auto rhsInt = std::get<bool>(rhsValue);
+        switch (type)
+        {
         case LexemeType::Or:
             result.value = lhsInt || rhsInt;
             break;
-        
+    
         case LexemeType::And:
             result.value = lhsInt && rhsInt;
             break;
 
         default:
-            throw std::runtime_error("unsupported string operation");
+            throw std::runtime_error("unsupported bool operation");
         }
         m_stack.push(std::move(result));
     }
@@ -279,9 +297,9 @@ void Interpreter::HandleUnary(LexemeType type)
     m_stack.pop();
     Value opValue = ResolveValue(op);
     
-    if (std::holds_alternative<long long int>(opValue))
+    if (std::holds_alternative<bool>(opValue))
     {
-        const auto opInt = std::get<long long int>(opValue);
+        const auto opInt = std::get<bool>(opValue);
         switch (type)
         {
         case LexemeType::Not:
@@ -289,7 +307,7 @@ void Interpreter::HandleUnary(LexemeType type)
             break;
         
         default:
-            throw std::runtime_error("unsupported string operation");
+            throw std::runtime_error("unsupported bool operation");
         }
     }
     else
