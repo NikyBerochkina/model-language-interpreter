@@ -1,0 +1,11 @@
+program
+{
+    int n;
+    read(n);
+
+    if (n > 100)
+    {
+        write("mmm so big");
+    }
+    write("n =", n);
+}

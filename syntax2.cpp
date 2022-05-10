@@ -228,19 +228,23 @@ void Parser::AnalizeIf()
     {
         THROW("operator expected", m_scanner.GetCurrentLine(), Lexeme{});
     }
-    auto pos2 = m_poliz.AddGoto();
 
-    if (const auto lex = GetLexeme(); lex.type != LexemeType::Else)
+    if (auto lex = GetLexeme(); lex.type == LexemeType::Else)
     {
-        THROW("else expected", m_scanner.GetCurrentLine(), lex);
-    }
+        auto pos2 = m_poliz.AddGoto();
 
-    m_poliz.SetLabel(pos1);
-    if (!AnalizeOperator())
-    {
-        THROW("operator expected", m_scanner.GetCurrentLine(), Lexeme{});
+        m_poliz.SetLabel(pos1);
+        if (!AnalizeOperator())
+        {
+            THROW("operator expected", m_scanner.GetCurrentLine(), Lexeme{});
+        }
+        m_poliz.SetLabel(pos2);
     }
-    m_poliz.SetLabel(pos2);
+    else 
+    {
+        SaveLexeme(std::move(lex));
+        m_poliz.SetLabel(pos1);
+    }
 }
 
 void Parser::AnalizeWhile()
