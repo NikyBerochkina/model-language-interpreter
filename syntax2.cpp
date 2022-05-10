@@ -393,6 +393,10 @@ void Parser::AnalizeExpressionThirdLevel()
     }
     if (lex.type == LexemeType::Identifier)
     {
+        if (!m_poliz.HasIdentifier(std::get<std::string>(lex.value)))
+        {
+            throw std::runtime_error("unknown identifier");
+        }
         m_poliz.AddLexeme(lex);
 
         auto next = GetLexeme();
