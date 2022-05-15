@@ -57,15 +57,15 @@ Lexeme Parser::GetLexeme()
     }
     else
     {
-        lexeme = std::move(m_saved.front());
-        m_saved.pop_front();
+        lexeme = std::move(m_saved.top());
+        m_saved.pop();
     }
     return lexeme;
 }
 
 void Parser::SaveLexeme(Lexeme&& lexeme)
 {
-    m_saved.push_back(std::move(lexeme));
+    m_saved.push(std::move(lexeme));
 }
 
 void Parser::AnalizeProgram(bool defenitions)
@@ -376,8 +376,8 @@ void Parser::AnalizeAssignment()
     auto assignment = GetLexeme();
     if (assignment.type != LexemeType::Assign)
     {
-        SaveLexeme(std::move(identifier));
         SaveLexeme(std::move(assignment));
+        SaveLexeme(std::move(identifier));
         AnalizePlainExpression();
         return;
     }
@@ -496,26 +496,31 @@ void Parser::AnalizePlusMinusOperand()
 
 void Parser::AnalizeMultiplyDivideOperand()
 {
-    std::optional<Lexeme> saved;
-
-    auto lex = GetLexeme();
-    if (lex.type == LexemeType::Not)
+    if (auto lex = GetLexeme(); lex.type == LexemeType::Not)
     {
-        saved = lex;
-        lex = GetLexeme();
+        AnalizeUnaryOperand();
+        m_poliz.AddLexeme(lex);
     }
     else if (lex.type == LexemeType::Minus)
     {
-        saved = {LexemeType::UnaryMinus, {}};
-        lex = GetLexeme();
+        AnalizeUnaryOperand();
+        m_poliz.AddLexeme({LexemeType::UnaryMinus, {}});
     }
     else if (lex.type == LexemeType::Plus)
     {
-        saved = {LexemeType::UnaryPlus, {}};
-        lex = GetLexeme();
+        AnalizeUnaryOperand();
+        m_poliz.AddLexeme({LexemeType::UnaryPlus, {}});
     }
+    else
+    {
+        SaveLexeme(std::move(lex));
+        AnalizeUnaryOperand();
+    }
+}
 
-    if (lex.type == LexemeType::Literal)
+void Parser::AnalizeUnaryOperand()
+{
+    if (auto lex = GetLexeme(); lex.type == LexemeType::Literal)
     {
         m_poliz.AddLexeme(lex);
     }
@@ -539,13 +544,7 @@ void Parser::AnalizeMultiplyDivideOperand()
     {
         THROW("unexpected lexeme", m_scanner.GetCurrentLine(), lex);
     }
-
-    if (saved)
-    {
-        m_poliz.AddLexeme(*saved);
-    }
 }
-
 
 syntax_exception::syntax_exception(const char* msg, int line, Lexeme lexeme)
     : std::runtime_error{msg}

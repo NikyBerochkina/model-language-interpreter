@@ -1,9 +1,7 @@
 #pragma once
 #include "lexical2.h"
-#include <optional>
 #include <vector>
 #include <stack>
-#include <list>
 
 class Poliz;
 
@@ -40,9 +38,10 @@ private:
     void AnalizeComparsionOperand();
     void AnalizePlusMinusOperand();
     void AnalizeMultiplyDivideOperand();
+    void AnalizeUnaryOperand();
 
     Scanner& m_scanner;
-    std::list<Lexeme> m_saved;
+    std::stack<Lexeme> m_saved;
 
     Poliz& m_poliz;
     std::stack<std::vector<size_t>> m_breaks;
