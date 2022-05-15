@@ -514,14 +514,19 @@ void Parser::AnalizeMultiplyDivideOperand()
         saved = {LexemeType::UnaryPlus, {}};
         lex = GetLexeme();
     }
-    if (lex.type == LexemeType::Identifier)
+
+    if (lex.type == LexemeType::Literal)
+    {
+        m_poliz.AddLexeme(lex);
+    }
+    else if (lex.type == LexemeType::Identifier)
     {
         if (!m_poliz.HasIdentifier(std::get<std::string>(lex.value)))
         {
             THROW("unknown identifier", m_scanner.GetCurrentLine(), lex);
         }
         m_poliz.AddLexeme(lex);
-    }
+    } 
     else if (lex.type == LexemeType::LeftParenthesis)
     {
         AnalizeExpression();
@@ -529,10 +534,6 @@ void Parser::AnalizeMultiplyDivideOperand()
         {
             THROW("')' expected", m_scanner.GetCurrentLine(), lex);
         }
-    }
-    else if (lex.type == LexemeType::Literal)
-    {
-        m_poliz.AddLexeme(lex);
     }
     else
     {
