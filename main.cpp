@@ -4,6 +4,48 @@
 #include "syntax2.h"
 #include "poliz2.h"
 
+#ifndef DEBUG_INTERPRETER
+# define DEBUG_INTERPRETER 0
+#endif
+
+void PrintLexemas(std::istream& is)
+{
+    Scanner scanner(is);
+
+    Lexeme lex;
+    while ((lex = scanner.GetLexeme()).type != LexemeType::Eof)
+    {
+        std::cout << lex << std::endl;
+    }
+}
+
+void PrintPoliz(std::istream& is)
+{
+    Scanner scanner(is);
+
+    Poliz poliz;
+    Parser parser(scanner, poliz);
+    parser.Analize();
+
+    const auto& program = poliz.GetProgram();
+    for (size_t i = 0; i < program.size(); ++i)
+    {
+        std::cout << "i: " << i << ", " << program[i] << std::endl;
+    }
+}
+
+void ExecuteProgram(std::istream& is)
+{
+    Scanner scanner(is);
+
+    Poliz poliz;
+    Parser parser(scanner, poliz);
+    parser.Analize();
+
+    auto interpreter = poliz.CreateInterpreter();
+    interpreter.Run(DEBUG_INTERPRETER);
+}
+
 int main(int argc, char** argv)
 {
     try
@@ -19,15 +61,13 @@ int main(int argc, char** argv)
         {
             input = &std::cin;
         }
-
-        Scanner scanner(*input);
-        Poliz poliz;
-
-        Parser parser(scanner, poliz);
-        parser.Analize();
-
-        auto interpreter = poliz.CreateInterpreter();
-        interpreter.Run();
+#if defined (LEXICAL)
+        PrintLexemas(*input);
+#elif defined (POLIZ)
+        PrintPoliz(*input);
+#else
+        ExecuteProgram(*input);
+#endif
     }
     catch (lexical_exception& e)
     {

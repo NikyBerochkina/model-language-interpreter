@@ -1,2 +1,5 @@
 *.o
 int
+lexical
+poliz
+debug
