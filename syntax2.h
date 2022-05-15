@@ -32,9 +32,11 @@ private:
     void AnalizeBreak();
     void AnalizeExpressionOperator();
     void AnalizeExpression();
-    void AnalizeExpressionFirstLevel();
-    void AnalizeExpressionSecondLevel();
-    void AnalizeExpressionThirdLevel();
+    void AnalizeOrOperand();
+    void AnalizeAndOperand();
+    void AnalizeComparsionOperand();
+    void AnalizePlusMinusOperand();
+    void AnalizeMultiplyDivideOperand();
 
     Scanner& m_scanner;
     std::optional<Lexeme> m_saved;

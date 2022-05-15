@@ -4,7 +4,7 @@
 
 #define THROW(msg, line, lex) throw syntax_exception((msg), (line), (lex))
 
-bool IsOperatorFirstLevel(LexemeType op)
+bool IsComparsionOperator(LexemeType op)
 {
     return
         op == LexemeType::Less ||
@@ -15,20 +15,18 @@ bool IsOperatorFirstLevel(LexemeType op)
         op == LexemeType::NotEqual;
 }
 
-bool IsOperatorSecondLevel(LexemeType op)
+bool IsPlusMinusOperator(LexemeType op)
 {
     return
         op == LexemeType::Minus ||
-        op == LexemeType::Plus ||
-        op == LexemeType::Or;
+        op == LexemeType::Plus;
 }
 
-bool IsOperatorThirdLevel(LexemeType op)
+bool IsMultiplyDivideOperator(LexemeType op)
 {
     return
         op == LexemeType::Multiply ||
-        op == LexemeType::Divide ||
-        op == LexemeType::And;
+        op == LexemeType::Divide;
 }
 
 Parser::Parser(Scanner& scanner, Poliz& poliz)
@@ -362,42 +360,89 @@ void Parser::AnalizeExpressionOperator()
 
 void Parser::AnalizeExpression()
 {
-    AnalizeExpressionFirstLevel();
+    AnalizeOrOperand();
 
+    std::vector<size_t> successes;
     auto lex = GetLexeme();
-    while (IsOperatorFirstLevel(lex.type))
+    while (lex.type == LexemeType::Or)
     {
-        AnalizeExpressionFirstLevel();
-        m_poliz.AddLexeme(lex);
+        const auto pos = m_poliz.AddConditionalGoto();
+        m_poliz.AddLexeme({LexemeType::Literal, true});
+        successes.push_back(m_poliz.AddGoto());
+        m_poliz.SetLabel(pos);
 
+        AnalizeOrOperand();
         lex = GetLexeme();
     }
     SaveLexeme(std::move(lex));
+
+    if (successes.empty())
+    {
+        return;
+    }
+
+    m_poliz.AddLexeme({LexemeType::Literal, false});
+    for (const auto pos: successes)
+    {
+        m_poliz.SetLabel(pos);
+    }
 }
 
-void Parser::AnalizeExpressionFirstLevel()
+void Parser::AnalizeOrOperand()
 {
-    AnalizeExpressionSecondLevel();
+    AnalizeAndOperand();
 
+    std::vector<size_t> failures;
     auto lex = GetLexeme();
-    while (IsOperatorSecondLevel(lex.type))
+    while (lex.type == LexemeType::And)
     {
-        AnalizeExpressionSecondLevel();
-        m_poliz.AddLexeme(lex);
+        failures.push_back(m_poliz.AddConditionalGoto());
 
+        AnalizeAndOperand();
         lex = GetLexeme();
     }
     SaveLexeme(std::move(lex));
+
+    if (failures.empty())
+    {
+        return;
+    }
+
+    m_poliz.AddLexeme({LexemeType::Literal, true});
+    const auto exitPos = m_poliz.AddGoto();
+    
+    for (const auto pos: failures)
+    {
+        m_poliz.SetLabel(pos);
+    }
+
+    m_poliz.AddLexeme({LexemeType::Literal, false});
+    m_poliz.SetLabel(exitPos);
 }
 
-void Parser::AnalizeExpressionSecondLevel()
+void Parser::AnalizeAndOperand()
 {
-    AnalizeExpressionThirdLevel();
+    AnalizeComparsionOperand();
+
+    if (auto lex = GetLexeme(); IsComparsionOperator(lex.type))
+    {
+        AnalizeComparsionOperand();
+        m_poliz.AddLexeme(lex);
+    }
+    else
+    {
+        SaveLexeme(std::move(lex));
+    }
+}
+
+void Parser::AnalizeComparsionOperand()
+{
+    AnalizePlusMinusOperand();
 
     auto lex = GetLexeme();
-    while (IsOperatorThirdLevel(lex.type))
+    while (IsPlusMinusOperator(lex.type))
     {
-        AnalizeExpressionThirdLevel();
+        AnalizePlusMinusOperand();
         m_poliz.AddLexeme(lex);
 
         lex = GetLexeme();
@@ -405,7 +450,22 @@ void Parser::AnalizeExpressionSecondLevel()
     SaveLexeme(std::move(lex));
 }
 
-void Parser::AnalizeExpressionThirdLevel()
+void Parser::AnalizePlusMinusOperand()
+{
+    AnalizeMultiplyDivideOperand();
+
+    auto lex = GetLexeme();
+    while (IsMultiplyDivideOperator(lex.type))
+    {
+        AnalizeMultiplyDivideOperand();
+        m_poliz.AddLexeme(lex);
+
+        lex = GetLexeme();
+    }
+    SaveLexeme(std::move(lex));
+}
+
+void Parser::AnalizeMultiplyDivideOperand()
 {
     std::optional<Lexeme> saved;
 

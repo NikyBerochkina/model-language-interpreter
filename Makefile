@@ -1,4 +1,5 @@
 CXX = g++ --std=c++17 -O2
+# CXX = g++ --std=c++17 -g
 
 all: int
 
