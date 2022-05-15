@@ -51,21 +51,21 @@ void Parser::Analize()
 Lexeme Parser::GetLexeme()
 {
     Lexeme lexeme;
-    if (m_saved)
+    if (m_saved.empty())
     {
-        lexeme = std::move(*m_saved);
-        m_saved.reset();
+        lexeme = m_scanner.GetLexeme();
     }
     else
     {
-        lexeme = m_scanner.GetLexeme();
+        lexeme = std::move(m_saved.front());
+        m_saved.pop_front();
     }
     return lexeme;
 }
 
 void Parser::SaveLexeme(Lexeme&& lexeme)
 {
-    m_saved = std::move(lexeme);
+    m_saved.push_back(std::move(lexeme));
 }
 
 void Parser::AnalizeProgram(bool defenitions)
@@ -360,6 +360,35 @@ void Parser::AnalizeExpressionOperator()
 
 void Parser::AnalizeExpression()
 {
+    AnalizeAssignment();
+}
+
+void Parser::AnalizeAssignment()
+{
+    auto identifier = GetLexeme();
+    if (identifier.type != LexemeType::Identifier)
+    {
+        SaveLexeme(std::move(identifier));
+        AnalizePlainExpression();
+        return;
+    }
+
+    auto assignment = GetLexeme();
+    if (assignment.type != LexemeType::Assign)
+    {
+        SaveLexeme(std::move(identifier));
+        SaveLexeme(std::move(assignment));
+        AnalizePlainExpression();
+        return;
+    }
+
+    m_poliz.AddLexeme(identifier);
+    AnalizeAssignment();
+    m_poliz.AddLexeme(assignment);
+}
+
+void Parser::AnalizePlainExpression()
+{
     AnalizeOrOperand();
 
     std::vector<size_t> successes;
@@ -492,17 +521,6 @@ void Parser::AnalizeMultiplyDivideOperand()
             THROW("unknown identifier", m_scanner.GetCurrentLine(), lex);
         }
         m_poliz.AddLexeme(lex);
-
-        auto next = GetLexeme();
-        if (!saved && next.type == LexemeType::Assign)
-        {
-            saved = next;
-            AnalizeExpression();
-        }
-        else
-        {
-            SaveLexeme(std::move(next));
-        }
     }
     else if (lex.type == LexemeType::LeftParenthesis)
     {

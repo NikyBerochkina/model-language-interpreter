@@ -3,6 +3,7 @@
 #include <optional>
 #include <vector>
 #include <stack>
+#include <list>
 
 class Poliz;
 
@@ -32,6 +33,8 @@ private:
     void AnalizeBreak();
     void AnalizeExpressionOperator();
     void AnalizeExpression();
+    void AnalizeAssignment();
+    void AnalizePlainExpression();
     void AnalizeOrOperand();
     void AnalizeAndOperand();
     void AnalizeComparsionOperand();
@@ -39,7 +42,7 @@ private:
     void AnalizeMultiplyDivideOperand();
 
     Scanner& m_scanner;
-    std::optional<Lexeme> m_saved;
+    std::list<Lexeme> m_saved;
 
     Poliz& m_poliz;
     std::stack<std::vector<size_t>> m_breaks;
