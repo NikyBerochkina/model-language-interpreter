@@ -2,7 +2,7 @@
 #include <iostream>
 
 Interpreter::Interpreter(const std::vector<Lexeme>& program,
-                         std::unordered_map<std::string, Value> variables)
+                         const std::unordered_map<std::string, Value>& variables)
     : m_program{program}
     , m_variables{variables}
 {
@@ -59,10 +59,7 @@ void Interpreter::Run(bool debug)
             break;
 
         case LexemeType::Clear:
-            while (!m_stack.empty())
-            {
-                m_stack.pop();
-            }
+            m_stack = {};
             i += 1;
             break;
         
@@ -106,13 +103,7 @@ void Interpreter::HandleRead()
     }
 
     std::visit(
-        [](auto& v) {
-            using T = std::decay_t<decltype(v)>;
-            if constexpr (!std::is_same_v<T, std::monostate>)
-            {
-                std::cin >> v;
-            }
-        },
+        [](auto& v) { std::cin >> v; },
         ResolveValue(lex));
 }
 
@@ -127,13 +118,7 @@ void Interpreter::HandleWrite(size_t ctr)
     for (auto& lex: lexes)
     {
         std::visit(
-            [](auto& v) {
-                using T = std::decay_t<decltype(v)>;
-                if constexpr (!std::is_same_v<T, std::monostate>)
-                {
-                    std::cout << std::boolalpha << v << " ";
-                }
-            },
+            [](auto& v) { std::cout << std::boolalpha << v << " "; },
             ResolveValue(lex));
     }
     std::cout << std::endl;
@@ -155,6 +140,12 @@ void Interpreter::HandleAssign()
     }
 
     auto& lhsValue = ResolveValue(lhs);
+
+    if (lhsValue.index() != rhsValue.index())
+    {
+        throw std::runtime_error("type mismatch");
+    }
+
     lhsValue = rhsValue;
 
     m_stack.push(lhs);

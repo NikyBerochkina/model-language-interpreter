@@ -331,13 +331,7 @@ std::ostream& operator << (std::ostream& os, const Lexeme& lex)
 
     os << "type: " << static_cast<uint32_t>(lex.type);
     std::visit(
-        [&os](const auto& l) {
-            using T = std::decay_t<decltype(l)>;
-            if constexpr (!std::is_same_v<T, std::monostate>)
-            {
-                os << ", value: {" << std::boolalpha << l << '}';
-            }
-        },
+        [&os](const auto& l) { os << ", value: {" << std::boolalpha << l << '}'; },
         lex.value);
     return os;
 }

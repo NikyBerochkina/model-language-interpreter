@@ -8,7 +8,7 @@ class Interpreter
 {
 public:
     Interpreter(const std::vector<Lexeme>& program,
-                std::unordered_map<std::string, Value>);
+                const std::unordered_map<std::string, Value>& variables);
     Interpreter(const Interpreter& rhs) = delete;
     Interpreter& operator = (const Interpreter& rhs) = delete;
 

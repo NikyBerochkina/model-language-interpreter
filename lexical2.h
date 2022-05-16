@@ -46,7 +46,7 @@ enum class LexemeType
     Eof,
 };
 
-using Value = std::variant<std::monostate, bool, long long int, std::string>;
+using Value = std::variant<bool, long long int, std::string>;
 
 struct Lexeme
 {

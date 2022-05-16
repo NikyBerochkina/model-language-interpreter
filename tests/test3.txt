@@ -2,7 +2,7 @@ program
 {
     string x = "azaza", y = "foobar";
     
-    if (not 0)
+    if (not false) /* (not 0) */
         read(x);
     else
         read(y);
